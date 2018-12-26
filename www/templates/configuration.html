@@ -1,0 +1,64 @@
+<ion-view view-title="CONFIGURATION">
+  
+  <ion-nav-bar class="background-menu-color font-view-color">
+      <ion-nav-back-button></ion-nav-back-button>
+        <ion-nav-buttons side="left">
+          <button class="button button-icon button-clear ion-navicon button-menu-icon" menu-toggle="left"></button>
+      </ion-nav-buttons>
+  </ion-nav-bar>
+
+  <ion-footer-bar class="background-color no-lines-footer">
+      <div class="button-bar">
+          <a style="border-radius: 0px;margin-right: 3px;" class="button button-modal-down" ng-click="clearFields();">CLEAR</a>
+      </div>
+      <div class="button-bar">
+       <a style="border-radius: 0px;margin-left: 3px;"  class="button button-modal-down" ng-click="saveFields();">SAVE</a>
+      </div>
+  </ion-footer-bar>
+
+<ion-content padding="true" class="has-header background-color">
+
+    <div class="item item-body rect-color font-alternate-color" style="margin-top:5%;"> 
+      <ion-icon name="pulse" class="button-config-icon" style="float:left"></ion-icon>
+      <label class="font-default-color font-bold font-20" style="margin-left:5%;">EMERGENCY ALERT</label>
+      <input id="emergencyalert" type="checkbox" class="checkbox" style="float:right;margin-top:7px;" ng-click="emergencyAlert();">
+    </div>
+
+    <div class="item item-body rect-color" style="margin-top:5px;">    
+          <label class="font-default-color font-bold font-20">Call medic</label>
+          <input id="emergencyvalue" type="checkbox" class="checkbox" style="float:right;margin-top:7px;" ng-click="medic();">
+          <input id="emergencytext" type="textbox" class="item item-input input-label-modal input-style input-with-check"><br><br>
+
+          <label class="font-default-color font-bold font-20">Call police</label>
+          <input id="policevalue" type="checkbox" class="checkbox" style="float:right;margin-top:7px;" ng-click="police();">
+          <input id="policetext" type="textbox" class="item item-input input-label-modal input-style input-with-check"><br><br>
+
+          <label class="font-default-color font-bold font-20">Alert time</label>
+          <!-- <input id="alertvalue" type="checkbox" class="checkbox" style="float:right;margin-top:7px;"> -->
+          <input id="alerttext" type="textbox" class="item item-input input-label-modal input-style input-without-check">
+    </div>
+
+    <div class="item item-body rect-color font-alternate-color" style="margin-top:5%;">
+      <ion-icon name="contact"class="button-config-icon" style="float:left"></ion-icon>            
+      <label class="font-default-color font-bold font-20" style="margin-left:5%;">FAMILY ALERT</label>
+      <input id="familyalert" type="checkbox" class="checkbox" style="float:right;margin-top:7px;" ng-click="familyAlert();">  
+    </div>
+
+    <div class="item item-body rect-color" style="margin-top:5px;"> 
+      <label class="font-default-color font-bold font-20">Phone</label>
+      <input id="phonevalue" type="checkbox" class="checkbox" style="float:right;margin-top:7px;">
+      <input id="phonetext" type="textbox" class="item item-input input-label-modal input-style input-with-check"><br><br>
+      
+      <label class="font-default-color font-bold font-20">Send SMS</label>
+      <input id="sms" type="checkbox" class="checkbox" style="float:right;margin-top:7px;" ><br><br>
+
+      <label class="font-default-color font-bold font-20">Alert time</label>
+      <!-- <input id="alert2value" type="checkbox" class="checkbox" style="float:right;margin-top:7px;"> -->
+      <input id="alert2text" type="textbox" class="item item-input input-label-modal input-style input-without-check">
+      
+
+  </div>
+
+</ion-content>
+
+</ion-view>

@@ -1,0 +1,89 @@
+<ion-view view-title="TRACK RECORD" ng-controller="TrackRecordCtrl">
+  
+    <ion-nav-bar class="background-menu-color font-view-color">
+      <ion-nav-back-button></ion-nav-back-button>
+        <ion-nav-buttons side="left">
+          <button class="button button-icon button-clear ion-navicon button-menu-icon" menu-toggle="left"></button>
+      </ion-nav-buttons>
+    </ion-nav-bar>
+
+    <!-- <ion-footer-bar class="no-lines-footer transparent-footer">
+        <div class="button-bar" ng-show="!isTracking">
+            <a style="border-radius: 0px;margin-right: 3px;" class="button button-modal-down" ng-click="startTracking();">Start Tracking</a>
+        </div>
+        <div class="button-bar" ng-show="isTracking">
+         <a style="border-radius: 0px;margin-left: 3px;"  class="button button-modal-down" ng-click="stopTracking();">Stop tracking</a>
+        </div> -->
+        <!-- <button ion-button full icon-left ng-click="startTracking()" *ngIf="!isTracking">
+            <ion-icon name="locate"></ion-icon>
+            Start Tracking
+          </button>
+        <button ion-button full color="danger" icon-left ng-click="stopTracking()" *ngIf="isTracking">
+            <ion-icon name="hand"></ion-icon>
+            Stop Tracking
+        </button>
+        <button ion-button full color="danger" icon-left ng-click="updatePosition()">
+            <ion-icon name="hand"></ion-icon>
+            Update position
+        </button>
+    </ion-footer-bar> -->
+
+    <ion-content>
+        <div id="videos-container">
+            <video id="video" poster="img/background-record.jpg"></video>
+        </div>
+        <div class="aux-div">
+            <ion-icon name="eye" style="width:30px;height:30px;float:left;margin-left:5px;" class="button-aux-div {{show}}" ng-click="hideAuxDiv();"></ion-icon>
+            <ion-icon name="eye-off" style="width:30px;height:30px;float:left;margin-left:5px;" class="button-aux-div {{notshow}}" ng-click="showAuxDiv();"></ion-icon>
+            <ion-icon name="images" style="width:30px;height:30px;float:right;margin-right:5px;" class="button-aux-div {{show}}" ng-click="GetPhoto();"></ion-icon>
+        </div>
+  
+            <!-- <ion-icon class="button button-positive button-modal-logo" style="position:absolute; top:200px;left:30px;" name="square-outline" ng-click="startCameraAbove();">            
+            </ion-icon>    
+            <ion-icon class="button button-positive button-modal-logo" style="position:absolute; top:200px;left:140px;" name="square" ng-click="saveblob();">            
+            </ion-icon>
+            <ion-icon class="button button-positive button-modal-logo" style="position:absolute; top:260px;left:30px;" name="square-outline" ng-click="startRecord();">            
+            </ion-icon>
+            <ion-icon class="button button-positive button-modal-logo" style="position:absolute; top:260px;left:140px;" name="square" ng-click="stopRecord();">            
+            </ion-icon> -->
+
+        <div class="aux-div2 {{show}}">
+            <div style="float:left;">
+                <label class="font-div-color">Current speed: [{{info.speed}}]</label>
+                <label style="display:block;" class="font-div-color">Current location: [{{info.latitude}},{{info.longitude}}]</label>
+            </div>
+            <ion-icon name="locate" style="width:30px;height:30px;float:right;margin-right:5px;" class="button-aux-div {{show}}" ng-click="locateClient();"></ion-icon>
+        </div>
+
+        <div id="map" data-tap-disabled="true">
+
+        </div>
+        <div id="button">
+                <a href="#" class="float" id="menu-share">
+                    <i class="fa fa-plus my-float"></i>
+                </a>
+                <ul>
+                    <li>
+                        <a href="#" ng-click="ShareWithFacebook();">
+                            <i class="fa fa-facebook my-float"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" ng-click="ShareWithTwitter();">
+                            <i class="fa fa-twitter my-float"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" ng-click="ShareWithInstagram();">
+                            <i class="fa fa-instagram my-float"></i>
+                        </a>
+                    </li>
+                </ul>
+        </div>
+        <ion-icon class="button button-positive button-track button-modal-logo" name="play-circle" ng-show="!isTracking" ng-click="startRecord();">            
+        </ion-icon>
+        <ion-icon class="button button-positive button-track2 button-modal-logo" name="square" ng-show="isTracking" ng-click="stopRecord();">            
+        </ion-icon>
+    </ion-content>
+
+</ion-view>

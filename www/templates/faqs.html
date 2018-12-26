@@ -1,0 +1,29 @@
+<ion-view view-title="FAQs">
+  
+    <ion-nav-bar class="background-menu-color font-view-color">
+        <ion-nav-back-button></ion-nav-back-button>
+          <ion-nav-buttons side="left">
+            <button class="button button-icon button-clear ion-navicon button-menu-icon" menu-toggle="left"></button>
+        </ion-nav-buttons>
+    </ion-nav-bar>
+
+  <ion-content padding="true" class="has-header background-color">
+
+      <div class="item item-body rect-color font-alternate-color" style="margin-top:10px;"> 
+        <div ng-show=!show1><span>1. How to save a track ?</span><i class="icon ion-plus-circled" style="font-size:24px; float:right;" ng-click="open(1);"></i><br><br></div>
+        <div ng-show=!show2><span>2. How to find a saved track ?</span><i class="icon ion-plus-circled" style="font-size:24px; float:right;" ng-click="open(2);"></i><br><br></div>
+        <div ng-show=!show3><span>3. How to sync saved data ?</span><i class="icon ion-plus-circled" style="font-size:24px; float:right;" ng-click="open(3);"></i><br><br></div>
+        <div ng-show=!show4><span>4. How to configure alerts ?</span><i class="icon ion-plus-circled" style="font-size:24px; float:right;" ng-click="open(4);"></i><br><br></div>
+        <div ng-show=!show5><span>5. How to alert with social media ?</span><i class="icon ion-plus-circled" style="font-size:24px; float:right;" ng-click="open(5);"></i><br><br></div>
+        <div ng-show=explanation!=null>{{explanation}}</div>
+      </div>
+
+      <div class="item item-body rect-color" style="margin-top:20px;">    
+          <p class="font-default-color font-bold font-20"> APP Development</p>
+          <p class="font-default-color" style="margin-top:0px;">This is an app developed for a closure project of master on computer science.</p>
+          <p class="font-default-color">The purpose is show what I have learned in all classes and put in practice in this app by following concepts like DCU and his phases.</p>
+          <p class="font-default-color">This app is the resolution of what I have learn and how I used for a real project.</p>
+      </div>
+  </ion-content>
+
+</ion-view>

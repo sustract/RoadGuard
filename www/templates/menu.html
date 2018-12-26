@@ -1,0 +1,42 @@
+<ion-side-menus enable-menu-with-back-views="false">
+  
+    <ion-side-menu-content>
+      <ion-nav-bar class="bar-stable background-menu-color">
+        <ion-nav-back-button></ion-nav-back-button>
+        <ion-nav-buttons side="left">
+          <button class="button button-icon button-clear ion-navicon button-menu-icon" menu-toggle="left"></button>
+        </ion-nav-buttons>
+      </ion-nav-bar>
+      <ion-nav-view name="menuContent"></ion-nav-view>
+    </ion-side-menu-content>
+  
+    <ion-side-menu side="left">
+      <ion-header-bar class="bar-stable background-color-menu">
+        <!-- <img style="position:absolute; top:0; left:0; width:100%; height:100%;" src="img/logolow.png"></img> -->
+      </ion-header-bar>
+      <ion-content class="background-color-menu">
+        <ion-list>
+          <ion-item class="background-color-menu font-sidemenu-color font-menu" nav-clear menu-close href="#/app/trackrecord">
+            TRACK RECORD
+          </ion-item>
+          <ion-item class="background-color-menu font-sidemenu-color font-menu" nav-clear menu-close href="#/app/trackhistory">
+            TRACK HISTORY
+          </ion-item>
+          <!-- <ion-item class="background-color-menu font-sidemenu-color" nav-clear menu-close href="#/app/trackplayer">
+            TRACK PLAYER
+          </ion-item> -->
+          <ion-item class="background-color-menu font-sidemenu-color font-menu" nav-clear menu-close href="#/app/configuration">
+            CONFIGURATION
+          </ion-item>
+          <ion-item class="background-color-menu font-sidemenu-color font-menu" nav-clear menu-close href="#/app/faqs">
+            FAQs
+          </ion-item>
+          <img style="width:100%; height:100%;" src="img/logo_menu.png"></img>
+          <!-- <ion-item nav-clear menu-close ng-click="loginSM()">
+            Test Modal View
+          </ion-item> -->
+        </ion-list>
+      </ion-content>
+    </ion-side-menu>
+  
+  </ion-side-menus>
