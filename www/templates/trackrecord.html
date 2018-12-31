@@ -58,7 +58,7 @@
         <div id="map" data-tap-disabled="true">
 
         </div>
-        <div id="button">
+        <div id="button" class="{{show}}">
                 <a href="#" class="float" id="menu-share">
                     <i class="fa fa-plus my-float"></i>
                 </a>
@@ -78,11 +78,16 @@
                             <i class="fa fa-instagram my-float"></i>
                         </a>
                     </li>
+                    <li>
+                            <a href="#" ng-click="ShareWithWhatsApp();">
+                                <i class="fa fa-whatsapp my-float"></i>
+                            </a>
+                    </li>
                 </ul>
         </div>
-        <ion-icon class="button button-positive button-track button-modal-logo" name="play-circle" ng-show="!isTracking" ng-click="startRecord();">            
+        <ion-icon class="button button-track button-modal-logo" name="play-circle" ng-show="!isTracking" ng-click="startRecord();">            
         </ion-icon>
-        <ion-icon class="button button-positive button-track2 button-modal-logo" name="square" ng-show="isTracking" ng-click="stopRecord();">            
+        <ion-icon class="button button-track2 button-modal-logo" name="square" ng-show="isTracking" ng-click="stopRecord();">            
         </ion-icon>
     </ion-content>
 

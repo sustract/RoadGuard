@@ -152,6 +152,20 @@
     background:url(../img/google-drive-yellow.png) no-repeat;
     background-size: contain;
     background-position: center; 
+    min-width: 0 !important;
+    min-height: 0 !important;
+    width: 30%;
+    height: 50px;
+    border-radius: 8px !important;
+    font-size: 30px !important; 
+    /* background-color: transparent !important; */
+    margin-top:5px;
+    margin-bottom: 5px;
+    /* margin-right: 1%;
+    margin-left:1%; */
+    color:#C0A346 !important;
+    border-color: #C0A346 !important;
+    /* border-width: 2px !important; */
 }
 .checkbox{
     -ms-transform: scale(2); /* IE */
@@ -401,6 +415,11 @@ a#menu-share:hover > i{
     border-color: #C0A346 !important;
     /* border-width: 2px !important; */
 }
+.button-modal-logo-clicked{
+    color:#FFFFFF !important;
+    /* border-color: #C0A346 !important; */
+    background-color: #C0A346 !important;
+}
 .button-aux-div{
     /* min-width: 0 !important;
     min-height: 0 !important; */
@@ -434,4 +453,16 @@ a#menu-share:hover > i{
     margin-right:35px !important;
     color: #027388 !important;
     font-weight: bold !important;
+}
+.button-positive{
+    background-color: #027388 !important;
+    color:#C0A346 !important;
+    border-color: #027388 !important;
+}
+.loading-color{
+    color:#C0A346 !important;
+}
+.title{
+    left:30% !important;
+    font-weight:bold !important;
 }

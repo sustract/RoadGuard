@@ -1,15 +1,22 @@
 // Ionic Starter App
 
+//////////////////////////////////////////////////////
+//////////// GLOBAL VARIABLES AND FUNCTIONS //////////
+//////////////////////////////////////////////////////
+
 // Starter global variables
 var db = null;
 var hidemenu = "";
 var nobackground = false;
 var trackids = null;
+var ca_id = null;
+var ea_id = null;
 var mediaRecorder;
 var platformready = false;
 var path;
 var pathFiles = "Tracks";
 var today;
+var now;
 var numPictures = 0;
 var localConfig = {};
 
@@ -31,6 +38,9 @@ function getDateNow(){
   today = mm+'-'+dd+'-'+yyyy;
 }
 
+function getDatetime(){
+  now = new Date();
+}
 
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example
@@ -52,54 +62,66 @@ angular.module('starter', ['ionic', 'starter.controllers','ngCordova'])
     }
 
     platformready = true;
-    
-    var optionsDB = {
-      name: 'TDDM.db',
-      location: 'default',
-      androidDatabaseProvider: 'system'
-    }
 
     ///////////////////////////////
     //////////// INIT DB //////////
     ///////////////////////////////
-    
+    var optionsDB = {
+      name: 'TFM.db',
+      location: 'default',
+      androidDatabaseProvider: 'system'
+    }
+  
     if(window.cordova) {
       // App syntax
-      db = $cordovaSQLite.openDB(optionsDB);
+      db = window.sqlitePlugin.openDatabase({name:'TFM.db', location: 'default'});
     } else {
       // Ionic serve syntax
-      db = window.openDatabase(optionsDB, "1.0", "TDDM", -1);
+      db = window.openDatabase(optionsDB, "1.0", "TFM", -1);
     }
-
+  
     if(db != null && db != undefined)
     {
+      // Create track table
       $cordovaSQLite.execute(db, "SELECT * FROM SUS1").then(function(res){
         console.log(res);
-        //var query = "INSERT INTO SUS1 (trackId, pointlatitude, pointlongitude) VALUES ('0','1.0', '1.0')";
-        //$cordovaSQLite.execute(db, query);
       }, function(err){
-        // $cordovaSQLite.execute(db, "DROP TABLE ROUTE");
-        // $cordovaSQLite.execute(db, "DROP TABLE SUS1");
-        $cordovaSQLite.execute(db, "CREATE TABLE SUS1 (trackid text, pointlatitude text, pointlongitude text)");
-        // var query = "INSERT INTO ROUTE (trackId, pointlatitude, pointlongitude) VALUES ('0','1.0', '1.0')";
-        // $cordovaSQLite.execute(db, query);
+        $cordovaSQLite.execute(db, "CREATE TABLE TRACKS (trackid text, pointlatitude text, pointlongitude text)");
+        $cordovaSQLite.execute(db, "CREATE TABLE CONTENT_AUDITORY (ca_id integer primary key, ca_type_content smallint, ca_date_generated datetime, ca_name varchar(255), ca_size float, ca_sync boolean)");
+        $cordovaSQLite.execute(db, "CREATE TABLE EVENT_AUDITORY (ea_id integer primary key, ea_type smallint, ea_date_generated datetime, ea_tile varchar(255), ea_description varchar(400))");
       });
+
+      // $cordovaSQLite.execute(db, "SELECT * FROM SUS1").then(function(res){
+      //   console.log(res);
+      //   // $cordovaSQLite.execute(db, "DROP TABLE ROUTE");
+      //   // $cordovaSQLite.execute(db, "DROP TABLE SUS1");
+      //   // $cordovaSQLite.execute(db, "DROP TABLE CONTENT_AUDITORY");
+      //   // $cordovaSQLite.execute(db, "DROP TABLE EVENT_AUDITORY");
+      // }, function(err){
+      //   // $cordovaSQLite.execute(db, "CREATE TABLE Users (id integer primary key, Username text, Password text, Email text, Adress text)")
+      //   // var query = "INSERT INTO ROUTE (trackId, pointlatitude, pointlongitude) VALUES ('0','1.0', '1.0')";
+      //   // $cordovaSQLite.execute(db, query);
+      // });
     }
     else
     {
       console.log("Error creating, accessing DB...")
     }
-
+   
     // Set date on init
     getDateNow();
 
     // Set value for trackids
     if(window.localStorage.getItem("trackids") == undefined){
       window.localStorage.setItem("trackids", 0);
+      window.localStorage.setItem("ca_id", 0);
+      window.localStorage.setItem("ea_id", 0);
     }
 
     // Get value for trackids
     trackids = window.localStorage.getItem("trackids");
+    ca_id = window.localStorage.getItem("ca_id");
+    ea_id = window.localStorage.getItem("ea_id");
 
     // On device ready, restore configuration
     if (window.localStorage.getItem("AllowGps") == undefined)
@@ -147,8 +169,7 @@ angular.module('starter', ['ionic', 'starter.controllers','ngCordova'])
       ShowPermissions : window.localStorage.getItem("ShowPermissions")
     };
     
-    // Check permissions granted for app
-
+    // // Check permissions granted for app
     // //check location
     // cordova.plugins.diagnostic.getLocationAuthorizationStatus(function(status){
     //     switch(status){
@@ -206,13 +227,13 @@ angular.module('starter', ['ionic', 'starter.controllers','ngCordova'])
     //     console.error("The following error occurred: "+error);
     // });
 
-    //check phone
-    //check sms
-    //Couldn't detect
+    // //check phone
+    // //check sms
+    // //Couldn't detect
 
     // path = cordova.file.externalRootDirectory;
 
-    $state.go('app.trackrecord');
+    $state.go('app.permissions');
   });
 })
 

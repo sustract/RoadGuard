@@ -7,10 +7,37 @@ var video = null;
 var init = false;
 var currentStream = null;
 var currentTrack = {};
+var currentPositionDevice = null;
+
+// Entities
+var e_track = { id : null, name : null, size : null, date : null, videoid : null, path : null, sync : null };
+var e_video = { id : null, size : null, duration : null, format : null, quality : null };
+var e_image = { id : null, name : null, size : null, format : null, quality : null };
+var e_map = { id : null, size : null };
+var e_event = { id : null, name : null, type : null, date : null };
+var e_info = { id : null, avgspeed : null, maxspeed : null, coordinates : null };
+// Toast notifications
+
+function toastMessage(message, position){
+  window.plugins.toast.showWithOptions({
+    message: message,
+    duration: "short", // 2000 ms
+    position: position,
+    addPixelsY:-100,
+    styling: {
+      opacity: 1, // 0.0 (transparent) to 1.0 (opaque). Default 0.8
+      backgroundColor: '#C0A346', // make sure you use #RRGGBB. Default #333333
+      textColor: '#027388', // Ditto. Default #FFFFFF
+      textSize: 15, // Default is approx. 13.
+      cornerRadius: 12, // minimum is 0 (square). iOS default 20, Android default 100
+      horizontalPadding: 25, // iOS default 16, Android default 50
+      verticalPadding: 25 // iOS default 12, Android default 30
+    }
+  });
+}
 
 // Definition of different controllers used in application
 angular.module('starter.controllers', ['ngCordova'])
-
 
 // Logic of Menu and Modals screens
 .controller('AppCtrl', function($scope, $ionicModal, $timeout) {
@@ -100,8 +127,24 @@ angular.module('starter.controllers', ['ngCordova'])
 })
 
 // Logic of TrackRecord screen
-.controller('TrackRecordCtrl', function($scope, $cordovaGeolocation, $ionicPlatform, $cordovaSQLite, $ionicPopup, $timeout) {
+.controller('TrackRecordCtrl', function($scope, $cordovaGeolocation, $ionicLoading, $ionicPlatform, $cordovaSQLite, $ionicPopup, $timeout) {
 
+
+      function showLoading() {
+        $ionicLoading.show({
+          template: '<div class="loading-color"><b>Saving track...<b></div>',
+          duration: 2000
+        }).then(function(){
+          console.log("The loading indicator is now displayed");
+        });
+      };
+      
+      function hideLoading(){
+        $ionicLoading.hide().then(function(){
+          console.log("The loading indicator is now hidden");
+        });
+      };
+      
       /////////////////////////////////////////////////
       ///////////////// AUXILIAR DIVS /////////////////
       /////////////////////////////////////////////////
@@ -170,9 +213,44 @@ angular.module('starter.controllers', ['ngCordova'])
             }
           }
         }
-
       }
 
+        // Alert dialog to cancel alert, or call to who are configured
+        $scope.showAdvice = function(title, template) {
+          var alertPopup = $ionicPopup.confirm({
+            title: title,
+            template: template,
+            buttons: [
+                      {   
+                        text: '<b>Cancel<b>',
+                        type: 'button-positive'
+                      } ,
+                      {
+                        text: '<b>OK</b>',
+                        type: 'button-positive',
+                        onTap: function(e) {
+                            cordova.plugins.diagnostic.switchToLocationSettings();
+                        }
+                      }
+                    ]
+          });
+
+          // alertPopup.then(function(res) {
+          //   if(res) {
+          //     // console.log('You are sure');
+          //     // $state.go('app.trackhistory');
+          //     // Open settings
+          //     cordova.plugins.diagnostic.switchToLocationSettings();
+          //   } else {
+          //     // console.log('You are not sure');
+          //   }
+          // });
+
+          // $timeout(function() {
+          //   alertPopup.close(); //close the popup after 3 seconds
+          //   $state.go('app.trackhistory');
+          // }, 2000);
+        };
 
       //////////////////////////////////////////
       //////////// DETECT ACCIDENT /////////////
@@ -210,7 +288,7 @@ angular.module('starter.controllers', ['ngCordova'])
             waitTime = Number(localConfig.AlertTimeEmergency) * 1000;
           }
         }
-        $scope.showAlert('[   ACCIDENT DETECTED   ]', 'IS NOT AN ACCIDENT ? THEN CLICK BUTTON.', waitTime, true);
+        $scope.showAlert('<div class="loading-color"><b>ACCIDENT DETECTED<b></div>', '<div class="loading-color"><b>Is not and accident? Then click [Cancel] button.<b></div>', waitTime, true);
       };
       
       onError = function () {
@@ -223,7 +301,7 @@ angular.module('starter.controllers', ['ngCordova'])
       /////////////////////////////////////////////////
 
       // Settings for google maps
-      var options = {timeout: 3000, enableHighAccuracy: true, maximumAge:0};
+      var optionsPosition = {timeout: 4000, enableHighAccuracy: true, maximumAge:100};
    
       var mapOptions = {
         center: $scope.latLng,
@@ -236,8 +314,9 @@ angular.module('starter.controllers', ['ngCordova'])
       };
       
       var watchOptions = {
-        timeout : 3000,
-        enableHighAccuracy: false // may cause errors if true
+        timeout : 500,
+        enableHighAccuracy: true, // may cause errors if true
+        maximumAge: 100
       };
 
       var marker = null;
@@ -253,12 +332,36 @@ angular.module('starter.controllers', ['ngCordova'])
       // Get current position of device
       $scope.getPosition = function(){
         // window.localStorage.setItem("AllowGps", "true");
-        $cordovaGeolocation.getCurrentPosition(options).then(function(position){        
+        navigator.geolocation.getCurrentPosition(successPosition, errorPosition, optionsPosition);
+
+        //$cordovaGeolocation.getCurrentPosition(options).then(function(position){        
+        function successPosition(position){
+          
           $scope.info = {
             latitude : position.coords.latitude,
             longitude : position.coords.longitude,
             speed : position.coords.speed
           }
+
+          // info entity
+          e_info = { 
+            id : trackids, 
+            avgspeed : 0, 
+            maxspeed : $scope.info.speed, 
+            coordinates : $scope.info.latitude + "," + $scope.info.longitude 
+          };
+
+          currentPositionDevice = {
+            latitude : position.coords.latitude,
+            longitude : position.coords.longitude
+          }
+
+          // map entity
+          e_map = { 
+            id : trackids, 
+            size : 0 
+          };
+
           $scope.latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
           if($scope.map == undefined){
             $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
@@ -281,20 +384,44 @@ angular.module('starter.controllers', ['ngCordova'])
           marker.setMap($scope.map);
           $scope.map.setCenter(marker.getPosition());
           $scope.map.setZoom(16);
-
-        }, function(error){
+        }
+        
+        function errorPosition(error){
           console.log("Could not get location");
-        });
+        }
       }
 
       // Locate client on click
       $scope.locateClient = function(){
-        $cordovaGeolocation.getCurrentPosition(options).then(function(position){
+        navigator.geolocation.getCurrentPosition(successPosition2, errorPosition2, optionsPosition);
+        // $cordovaGeolocation.getCurrentPosition(optionsPosition).then(function(position){
+        function successPosition2(position){
+          
           $scope.info = {
             latitude : position.coords.latitude,
             longitude : position.coords.longitude,
             speed : position.coords.speed
           }
+
+          // info entity
+          e_info = { 
+            id : trackids, 
+            avgspeed : 0, 
+            maxspeed : $scope.info.speed, 
+            coordinates : $scope.info.latitude + "," + $scope.info.longitude 
+          };
+
+          currentPositionDevice = {
+            latitude : position.coords.latitude,
+            longitude : position.coords.longitude
+          }
+
+          // map entity
+          e_map = { 
+            id : trackids, 
+            size : 0 
+          };
+          
           $scope.latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
           if($scope.map == undefined){
             $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
@@ -316,17 +443,42 @@ angular.module('starter.controllers', ['ngCordova'])
           marker.setMap($scope.map);
           $scope.map.setCenter(marker.getPosition());
 
-          $scope.showAlert('[   Current position   ]', 'Coordinates: ' + position.coords.latitude + ',' + position.coords.longitude, 1000, false);
-        });
+          $scope.showAlert('<div class="loading-color"><b>CURRENT POSITION<b></div>', '<div class="loading-color"><b>Coordinates: ' + position.coords.latitude + ',' + position.coords.longitude + "<b></div>", 1000, false);
+        }
+
+        function errorPosition2(error){
+          console.log("Could not get location");
+        }
       };
 
       // Update position of device on demand a draw path
       $scope.updatePosition = function(position){
+
           $scope.info = {
             latitude : position.coords.latitude,
             longitude : position.coords.longitude,
             speed : position.coords.speed
           }
+
+          // info entity
+          e_info = { 
+            id : trackids, 
+            avgspeed : 0, 
+            maxspeed : $scope.info.speed, 
+            coordinates : $scope.info.latitude + "," + $scope.info.longitude 
+          };
+          
+          currentPositionDevice = {
+            latitude : position.coords.latitude,
+            longitude : position.coords.longitude
+          }
+
+          // map entity
+          e_map = { 
+            id : trackids, 
+            size : 0 
+          };
+          
           $scope.latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
           if($scope.map == undefined){
             $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
@@ -375,20 +527,44 @@ angular.module('starter.controllers', ['ngCordova'])
         });
       };
       
+      $scope.checkLocationBefore = function(){
+        cordova.plugins.diagnostic.isLocationAvailable(function(available){
+          console.log("Network location is " + (available ? "available" : "not available"));
+          if(!available){
+            $scope.showAdvice('<div class="loading-color"><b>LOCATION DISABLED<b></div>', '<div class="loading-color"><b>Enable location first by clicking on [OK] button.<b></div>');
+          }
+        }, function(error){
+          console.error("The following error occurred: "+error);
+
+        });
+      }
+
       // Start detection of location
       $scope.startTracking = function() {
         // $scope.isTracking = true;
+        $scope.checkLocationBefore();
         $scope.trackedRoute = [];
-    
-        watch = $cordovaGeolocation.watchPosition(watchOptions);
-        watch.then(
-          null,
-          function(err) {
-            // error
-          },
-          function(position) {
-           $scope.updatePosition(position);
-        });
+        $scope.watch = navigator.geolocation.watchPosition(successWatch, errorWatch, watchOptions);
+        // watch = $cordovaGeolocation.watchPosition(watchOptions);
+        // watch.then(
+        //   null,
+        //   function(err) {
+        //     // error
+        //     console.log("TIMEOUUUUUUUUUUUUUUUUUUT...")
+        //   },
+        //   function(position) {
+        //    $scope.updatePosition(position);
+        //    console.log("DETECTED CHANGE POSITION...")
+        // });
+      }
+
+      function successWatch(position){
+        $scope.updatePosition(position);
+        console.log("DETECED NEW POSITION...")
+      }
+      
+      function errorWatch(){
+        console.log("ERROR IN WATCH POSITION...")
       }
     
       // Draw path on map
@@ -412,16 +588,21 @@ angular.module('starter.controllers', ['ngCordova'])
       // Stop detection of location
       $scope.stopTracking = function() {
         // trackids = trackids + 1;
+        showLoading();
         var newRoute = { trackid: trackids, path: $scope.trackedRoute };
+
         // previousTracks.push(newRoute);
         // storage.set('routes', previousTracks);
         $scope.SaveRoute(newRoute);
       
         // $scope.isTracking = false;
-        watch.clearWatch();
+        // watch.clearWatch();
+        navigator.geolocation.clearWatch($scope.watch);
         if($scope.currentMapTrack){
           $scope.currentMapTrack.setMap(null);
         }
+        // hideLoading();
+        // toastMessage("Saved track","bottom");
       }
       
       
@@ -429,11 +610,24 @@ angular.module('starter.controllers', ['ngCordova'])
       //   redrawPath(route);
       // }
 
+      $scope.checkLocation = function(){
+        cordova.plugins.diagnostic.isLocationAvailable(function(available){
+          console.log("Network location is " + (available ? "available" : "not available"));
+          if(!available){
+            //$scope.showAlert('[   LOCATION DISABLED   ]', 'To track device in maps location have to be enabled. Check it!', 2000, false);
+            toastMessage("Location is not enabled", "bottom");
+          }
+        }, function(error){
+          console.error("The following error occurred: "+error);
+        });
+      }
+
       // On enter screen activate detection
       $scope.$on('$ionicView.beforeEnter', function(){
         if(platformready){
           //$scope.startCameraAbove();
           //$scope.startRecord();
+          $scope.checkLocation();
           $scope.ActivateDetector();
         }
       });
@@ -456,7 +650,7 @@ angular.module('starter.controllers', ['ngCordova'])
       // Start video and generation of track
       $scope.startRecord = function(){
         getDateNow();
-        window.localStorage.setItem("AllowVideo", "true");
+        // window.localStorage.setItem("AllowVideo", "true");
         $scope.isTracking = true;
         
         if(!init){
@@ -533,6 +727,26 @@ angular.module('starter.controllers', ['ngCordova'])
             mediaRecorder.ondataavailable = function(blob) {
               window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
                 console.log('file system open: ' + fs.name);
+                
+                e_video = { 
+                  id : trackids, 
+                  size : 0, 
+                  duration : 0, 
+                  format : 'mp4', 
+                  quality : '640x480' 
+                };
+                        
+                // track entity
+                e_track = { 
+                  id : trackids, 
+                  name : "Track-" + trackids + "_" + today + "_Video.mp4", 
+                  size : 0, 
+                  date : today, 
+                  videoid : trackids, 
+                  path : folderName, 
+                  sync : 0 
+                };
+
                 var directoryEntry = fs.root;
                 var folderName = pathFiles;
                 directoryEntry.getDirectory(folderName, { create: true, exclusive: false }, onDirectorySuccess, onDirectoryFail);
@@ -553,9 +767,10 @@ angular.module('starter.controllers', ['ngCordova'])
       
       // Save file to device
       function saveFile(dirEntry, fileData, folderName, fileName) {
-        window.localStorage.setItem("AllowStorage", "true");
+        // window.localStorage.setItem("AllowStorage", "true");
         dirEntry.getFile(folderName + '/' + fileName, { create: true, exclusive: false }, function (fileEntry) {
             writeFile(fileEntry, fileData);
+            $scope.insertContentAuditory(fileName, "video");
         }, onErrorCreateFile);
       }
 
@@ -583,12 +798,24 @@ angular.module('starter.controllers', ['ngCordova'])
         numPictures = numPictures + 1;
         getDateNow();
         $scope.fileScreenshot = "Track-" + trackids + "_" + today + "_ScreenShot-" + numPictures;
+        
+        // image entity
+        e_image = {
+          id : trackids,
+          name : $scope.fileScreenshot,
+          size : null, 
+          format : 'jpg', 
+          quality : '' 
+        }
+
         navigator.screenshot.save(function(error,res){
           if(error){
             console.error(error);
           }else{
             console.log('ok',res.filePath); //should be path/to/myScreenshot.jpg
-            $scope.showAlert('[   Screenshot created   ]', 'Save as:' + $scope.fileScreenshot, 3000, false);
+            //$scope.showAlert('[   Screenshot created   ]', 'Save as:' + $scope.fileScreenshot, 3000, false);
+            toastMessage("Screenshot saved","bottom");
+            $scope.insertContentAuditory($scope.fileScreenshot, "photo");
           }
         },'jpg',100, $scope.fileScreenshot);
       }
@@ -619,7 +846,7 @@ angular.module('starter.controllers', ['ngCordova'])
 
     // var phoneNumber = "620381230";
     // var textMessage = "This is a test message, fuck yeah!"
-    var options = {};
+    var optionsSMS = {};
 
     // On activate send sms, need request permission
     // $scope.requestSMS = function() {
@@ -641,8 +868,13 @@ angular.module('starter.controllers', ['ngCordova'])
     // Send sms to a number
     $scope.SendSMS = function(number){
       // window.localStorage.setItem("AllowSms", "true");
-      var textmessage = "I have an accident in this coordinates:" + $scope.latLng.longitude + "," + $scope.latLng.latitude + ". Please call emergency and police services.";
-      sms.send(number, textMessage, options, function(message) {
+      var textmessage;
+      if(currentPositionDevice != null){
+        textmessage = "I have an accident. Please call emergency and police services.";
+      }else{
+        textmessage = "I have an accident in this coordinates:" + currentPositionDevice.latitude + "," + currentPositionDevice.latitude + ". Please call emergency and police services.";
+      }
+      sms.send(number, textMessage, optionsSMS, function(message) {
         console.log("success: send message."); //+ message);
         $scope.showAlert('[   SMS sended   ]', 'To:' + number, 1000, false);
         // navigator.notification.alert(
@@ -662,9 +894,17 @@ angular.module('starter.controllers', ['ngCordova'])
 
     // Open facebook and share a message
     $scope.ShareWithFacebook = function(){
-      window.plugins.socialsharing.shareViaFacebookWithPasteMessageHint('Message via Facebook', null /* img */, null /* url */, 'Paste it dude!', 
+      var title = "Incident";
+      if(currentPositionDevice != null){
+        description = "Incident at this coordinates: (" + currentPositionDevice.latitude + "," + currentPositionDevice.latitude + "), take care!";
+      }else{
+        description = "Incident, take care!";
+      } 
+
+      window.plugins.socialsharing.shareViaFacebookWithPasteMessageHint(description, null /* img */, null /* url */, 'Press paste!', 
         function() {
-                      console.log('share ok')
+                      console.log('share ok');
+                      $scope.insertEventAuditory("facebook", title, description);
                     }, 
         function(errormsg)
                           {
@@ -675,22 +915,38 @@ angular.module('starter.controllers', ['ngCordova'])
 
     // Open twitter and share a message
     $scope.ShareWithTwitter = function(){
-      window.plugins.socialsharing.shareViaTwitter('Message and link via Twitter', null /* img */, 'http://www.x-services.nl',
-      function() {
-        console.log('share ok')
-      }, 
-      function(errormsg)
-            {
-              alert(errormsg)
-            }
+      var title = "Incident";
+      if(currentPositionDevice != null){
+        description = "Incident at this coordinates: (" + currentPositionDevice.latitude + "," + currentPositionDevice.longitude + "), take care!";
+      }else{
+        description = "Incident, take care!";
+      } 
+      
+      window.plugins.socialsharing.shareViaTwitter('', null /* img */, description,
+        function() {
+                    console.log('share ok');
+                    $scope.insertEventAuditory("twitter", title, description);
+                  }, 
+        function(errormsg)
+              {
+                alert(errormsg)
+              }
       )
     }
 
     // Open Instagram and share a message
     $scope.ShareWithInstagram = function(){
-      window.plugins.socialsharing.shareViaInstagram('Message via Instagram', 'https://www.google.nl/images/srpr/logo4w.png', 
+      var title = "Incident";
+      if(currentPositionDevice != null){
+        description = "Incident at this coordinates: (" + currentPositionDevice.latitude + "," + currentPositionDevice.longitude + "), take care!";
+      }else{
+        description = "Incident, take care!";
+      } 
+      
+      window.plugins.socialsharing.shareViaInstagram(description, '', 
         function(){
-                      console.log('share ok')
+                      console.log('share ok');
+                      $scope.insertEventAuditory("instagram", title, description);
                   }, 
         function(errormsg)
                   {
@@ -701,17 +957,142 @@ angular.module('starter.controllers', ['ngCordova'])
 
     // Open Whatsapp and share a message
     $scope.ShareWithWhatsApp = function(){
-      window.plugins.socialsharing.shareViaWhatsAppToReceiver('+34620381230', 'Message via WhatsApp: Fuck yeah! :)', null /* img */, null /* url */, 
-        function() {
-                      console.log('share ok')
+      var title = "Incident";
+      var description;
+      if(currentPositionDevice != null){
+        description = "Incident at this coordinates: (" + currentPositionDevice.latitude + "," + currentPositionDevice.longitude + "), take care!";
+      }else{
+        description = "Incident, take care!";
+      } 
+      
+      $scope.showPopup(title, description);
+      // window.plugins.socialsharing.shareViaWhatsAppToReceiver('+34666555444', description, null /* img */, null /* url */, 
+      //   function() {
+      //                 console.log('share ok');
+      //                 $scope.insertEventAuditory("whatsapp", title, description);
+      //             }, 
+      //   function(errormsg)
+      //                     {
+      //                       alert(errormsg)
+      //                     }
+      // )
+    }
+
+    // Triggered on a button click, or some other target
+    $scope.showPopup = function(title, description) {
+      $scope.data = {};
+
+      // An elaborate, custom popup
+      var myPopup = $ionicPopup.show({
+        template: '<input type="text" ng-model="data.phone">',
+        title: '<div class="loading-color"><b>ENTER PHONE NUMBER<b></div>',
+        subTitle: '',
+        scope: $scope,
+        buttons: [
+          { text: '<b>Cancel<b>',
+            type: 'button-positive'
+          },
+          {
+            text: '<b>Continue</b>',
+            type: 'button-positive',
+            onTap: function(e) {
+              if (!$scope.data.phone) {
+                //don't allow the user to close unless he enters wifi password
+                e.preventDefault();
+              } else {
+
+                window.plugins.socialsharing.shareViaWhatsAppToReceiver('+34'+ $scope.data.phone, description, null /* img */, null /* url */, 
+                  function() {
+                      console.log('share ok');
+                      $scope.insertEventAuditory("whatsapp", title, description);
                   }, 
-        function(errormsg)
+                  function(errormsg)
                           {
                             alert(errormsg)
                           }
-      )
-    }
-    
+                  )
+                // return $scope.data.phone;
+              }
+            }
+          }
+        ]
+      });
+
+      myPopup.then(function(res) {
+        console.log('Tapped!', res);
+      });
+
+      $timeout(function() {
+        myPopup.close(); //close the popup after 3 seconds for some reason
+      }, 20000);
+    };
+
+
+    // Save event in DB
+    $scope.insertEventAuditory = function(type, title, description){
+      var sm;
+      switch(type){
+        case "facebook":
+          sm = 1;
+          break;
+        case "twitter":
+          sm = 2;
+          break;
+        case "instagram":
+          sm = 3;
+          break;
+        case "whatsapp":
+          sm = 4;
+          break;
+      }
+
+      var id = Number(ea_id) + 1;
+      getDatetime();
+      var date = now;
+      var query = "INSERT INTO EVENT_AUDITORY (ea_id, ea_type, ea_date_generated, ea_tile, ca_description)";
+          query = query + "VALUES ("+ id + "," + date +"," + title + "," + description + "),";
+       
+      // event entity
+      e_event = { 
+        id : id, 
+        name : title +","+ description, 
+        type : sm, 
+        date : date 
+      };
+      
+      $cordovaSQLite.execute(db, query).then(function(res) {
+          console.log("Event added.");
+      }, function (err) {
+          console.log(err);
+      });
+    };
+
+    // Save route to DB
+    $scope.insertContentAuditory = function(filename, type){
+      var content;
+      switch(type){
+        case "video":
+          content = 1;
+          break;
+        case "photo":
+          content = 2;  
+          break;
+      }
+
+      var name = filename;
+      var id = Number(ca_id) + 1;
+      getDatetime();
+      var date = now;
+      var query = "INSERT INTO CONTENT_AUDITORY (ca_id, ca_type_content, ca_date_generated, ca_name, ca_size, ca_sync))";
+          query = query + "VALUES ("+ id + "," + content +"," + date + "," + name + ", 0, 0)";
+              
+      $cordovaSQLite.execute(db, query).then(function(res) {
+          console.log("Content added.");
+      }, function (err) {
+          console.log(err);
+      });
+    };
+
     $ionicPlatform.ready(function() {
       $scope.getPosition();
     });
@@ -777,7 +1158,7 @@ angular.module('starter.controllers', ['ngCordova'])
     alertPopup.then(function(res) {
       if(res) {
         // console.log('You are sure');
-        $state.go('app.trackhistory');
+        $scope.confirmDeleteFile();
       } else {
         // console.log('You are not sure');
       }
@@ -812,13 +1193,17 @@ angular.module('starter.controllers', ['ngCordova'])
 
   // Function to delete file
   $scope.DeleteFile = function(){
+    $scope.showAdvice('<div class="loading-color"><b>Delete action<b></div>', '<div class="loading-color"><b>Are you sure you want to delete track: ' + currentTrack.name + '?<b></div>');
+  }
+
+  $scope.confirmDeleteFile = function(){
     filename = currentTrack.name;
     window.resolveLocalFileSystemURL(path + '/' + pathFiles, function(dir) {
       dir.getFile(filename, {create:false}, function(fileEntry) {
                   fileEntry.remove(function(){
                       // The file has been removed succesfully
                       console.log("DELETED FILE" + currentTrack.name);
-                      $scope.showAdvice('[   Delete action   ]', 'Are you sure you want to delete track: ' + currentTrack.name + '?');
+                      $state.go('app.trackhistory');
                   },function(error){
                       // Error deleting the file
                   },function(){
@@ -834,7 +1219,7 @@ angular.module('starter.controllers', ['ngCordova'])
 .controller('ConfigurationCtrl', function($scope, $stateParams, $ionicPopup, $timeout) {
   
   // Alert dialog to advice of actions in configuration screen
-  $scope.showAdvice = function(title, template) {
+  $scope.showAlert = function(title, template) {
     var alertPopup = $ionicPopup.confirm({
       title: title,
       template: template
@@ -984,7 +1369,7 @@ angular.module('starter.controllers', ['ngCordova'])
     phonetext.value = "";
     alerttext.value = "";
     alert2text.value = "";
-    $scope.showAdvice('[   Clear action   ]', 'Are you sure you want to clear fields?');
+    $scope.showAlert('<div class="loading-color"><b>CLEAR FIELDS<b></div>', '<div class="loading-color"><b>Are you sure you want to clear values?<b></div>');
   }
 
   // On click save button save to localStorage
@@ -1007,7 +1392,7 @@ angular.module('starter.controllers', ['ngCordova'])
       window.localStorage.setItem("FamilyPhone", phonetext.value);
       window.localStorage.setItem("AlertTimeFamily", alert2text.value);
     }
-    $scope.showAdvice('[   Save action   ]', 'Are you sure you want to save fields?');
+    $scope.showAlert('<div class="loading-color"><b>SAVE CHANGES<b></div>', '<div class="loading-color"><b>Are you sure you want to save values?<b></div>');
   }
 })
 
@@ -1048,7 +1433,7 @@ angular.module('starter.controllers', ['ngCordova'])
           break;
         case 3:
           if($scope.explanation == null){
-            $scope.explanation = 'At the moment, it no able to sync data with cloud. In future versions will be a new functionality.';
+            $scope.explanation = 'At the moment, is not able to sync data with cloud. In future versions will be a new functionality.';
             $scope.show1 = $scope.show2 = $scope.show4 = $scope.show5 = true;
           }
           else{
@@ -1269,8 +1654,14 @@ angular.module('starter.controllers', ['ngCordova'])
   // Alert dialog to cancel alert, or call to who are configured
   $scope.showError = function() {
       var alertPopup = $ionicPopup.alert({
-      title: '[   MISSING PERMISSIONS   ]',
-      template: 'All permissions must be granted for a correct function of application.'
+      title: '<div class="loading-color"><b>MISSING PERMISSIONS<b></div>',
+      template: '<div class="loading-color">All permissions must be granted for a correct function of application.</div>',
+      buttons: [
+        {   
+          text: '<b>OK<b>',
+          type: 'button-positive'
+        }
+      ]
     });
 
     alertPopup.then(function(res) {
@@ -1280,6 +1671,6 @@ angular.module('starter.controllers', ['ngCordova'])
     $timeout(function() {
       // Accident
       alertPopup.close(); //close the popup after 3 seconds
-    }, 2000);
+    }, 3000);
   };
 });
