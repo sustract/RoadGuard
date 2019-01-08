@@ -83,7 +83,7 @@ angular.module('starter', ['ionic', 'starter.controllers','ngCordova'])
     if(db != null && db != undefined)
     {
       // Create track table
-      $cordovaSQLite.execute(db, "SELECT * FROM SUS1").then(function(res){
+      $cordovaSQLite.execute(db, "SELECT * FROM TRACKS").then(function(res){
         console.log(res);
       }, function(err){
         $cordovaSQLite.execute(db, "CREATE TABLE TRACKS (trackid text, pointlatitude text, pointlongitude text)");
@@ -169,69 +169,69 @@ angular.module('starter', ['ionic', 'starter.controllers','ngCordova'])
       ShowPermissions : window.localStorage.getItem("ShowPermissions")
     };
     
-    // // Check permissions granted for app
-    // //check location
-    // cordova.plugins.diagnostic.getLocationAuthorizationStatus(function(status){
-    //     switch(status){
-    //         case cordova.plugins.diagnostic.permissionStatus.NOT_REQUESTED:
-    //             console.log("Permission not requested");
-    //             break;
-    //         case cordova.plugins.diagnostic.permissionStatus.DENIED:
-    //             console.log("Permission denied");
-    //             break;
-    //         case cordova.plugins.diagnostic.permissionStatus.GRANTED:
-    //             console.log("Permission granted always");
-    //             window.localStorage.setItem("AllowGps", "true");
-    //             localConfig.AllowGps = true;
-    //             break;
-    //         case cordova.plugins.diagnostic.permissionStatus.GRANTED_WHEN_IN_USE:
-    //             console.log("Permission granted only when in use");
-    //             break;
-    //     }
-    // }, function(error){
-    //     console.error("The following error occurred: "+error);
-    // });
+    // Check permissions granted for app
+    //check location
+    cordova.plugins.diagnostic.getLocationAuthorizationStatus(function(status){
+        switch(status){
+            case cordova.plugins.diagnostic.permissionStatus.NOT_REQUESTED:
+                console.log("Permission not requested");
+                break;
+            case cordova.plugins.diagnostic.permissionStatus.DENIED:
+                console.log("Permission denied");
+                break;
+            case cordova.plugins.diagnostic.permissionStatus.GRANTED:
+                console.log("Permission granted always");
+                window.localStorage.setItem("AllowGps", "true");
+                localConfig.AllowGps = true;
+                break;
+            case cordova.plugins.diagnostic.permissionStatus.GRANTED_WHEN_IN_USE:
+                console.log("Permission granted only when in use");
+                break;
+        }
+    }, function(error){
+        console.error("The following error occurred: "+error);
+    });
 
-    // //check audio
-    // cordova.plugins.diagnostic.getMicrophoneAuthorizationStatus(function(status){
-    //   if(status === cordova.plugins.diagnostic.permissionStatus.GRANTED){
-    //       console.log("Microphone use is authorized");
-    //       window.localStorage.setItem("AllowAudio", "true");
-    //       localConfig.AllowAudio = true;
-    //     }
-    // }, function(error){
-    //     console.error("The following error occurred: "+error);
-    // });
+    //check audio
+    cordova.plugins.diagnostic.getMicrophoneAuthorizationStatus(function(status){
+      if(status === cordova.plugins.diagnostic.permissionStatus.GRANTED){
+          console.log("Microphone use is authorized");
+          window.localStorage.setItem("AllowAudio", "true");
+          localConfig.AllowAudio = true;
+        }
+    }, function(error){
+        console.error("The following error occurred: "+error);
+    });
 
-    // //check camera
-    // cordova.plugins.diagnostic.isCameraAuthorized({
-    //     successCallback: function(authorized){
-    //         console.log("App is " + (authorized ? "authorized" : "denied") + " access to the camera");
-    //         window.localStorage.setItem("AllowVideo", "true");
-    //         localConfig.AllowVideo = true;
-    //     },
-    //     errorCallback: function(error){
-    //         console.error("The following error occurred: "+error);
-    //     }, 
-    //     externalStorage: false
-    // });
+    //check camera
+    cordova.plugins.diagnostic.isCameraAuthorized({
+        successCallback: function(authorized){
+            console.log("App is " + (authorized ? "authorized" : "denied") + " access to the camera");
+            window.localStorage.setItem("AllowVideo", "true");
+            localConfig.AllowVideo = true;
+        },
+        errorCallback: function(error){
+            console.error("The following error occurred: "+error);
+        }, 
+        externalStorage: false
+    });
 
-    // //check storage
-    // cordova.plugins.diagnostic.getExternalStorageAuthorizationStatus(function(status){
-    //   if(status === cordova.plugins.diagnostic.permissionStatus.GRANTED){
-    //       console.log("External storage use is authorized");
-    //       window.localStorage.setItem("AllowStorage", "true");
-    //       localConfig.AllowStorage = true;
-    //   }
-    // }, function(error){
-    //     console.error("The following error occurred: "+error);
-    // });
+    //check storage
+    cordova.plugins.diagnostic.getExternalStorageAuthorizationStatus(function(status){
+      if(status === cordova.plugins.diagnostic.permissionStatus.GRANTED){
+          console.log("External storage use is authorized");
+          window.localStorage.setItem("AllowStorage", "true");
+          localConfig.AllowStorage = true;
+      }
+    }, function(error){
+        console.error("The following error occurred: "+error);
+    });
 
-    // //check phone
-    // //check sms
-    // //Couldn't detect
+    //check phone
+    //check sms
+    //Couldn't detect
 
-    // path = cordova.file.externalRootDirectory;
+    path = cordova.file.externalRootDirectory;
 
     $state.go('app.permissions');
   });

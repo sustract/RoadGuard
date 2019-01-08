@@ -73,17 +73,6 @@ angular.module('starter.controllers', ['ngCordova'])
       $scope.modal.show();
     };
 
-    // // Perform the login action when the user submits the login form
-    // $scope.doLogin = function() {
-    //   console.log('Doing login', $scope.loginData);
-
-    //   // Simulate a login delay. Remove this and replace with your login
-    //   // code if using a login system
-    //   $timeout(function() {
-    //     $scope.closeLoginSM();
-    //   }, 1000);
-    // };
-
     // Change title of modal screen
     $scope.changeTitle = function(text) {
       $scope.title = text;
@@ -93,7 +82,6 @@ angular.module('starter.controllers', ['ngCordova'])
     $scope.clearFields = function() {
       console.log('Clearing...');
       $scope.username = "";
-      //$scope.password = "Enter password";
       $scope.title = "LOGIN SCREEN";
       $scope.facebook = "";
       $scope.twitter = "";
@@ -180,6 +168,7 @@ angular.module('starter.controllers', ['ngCordova'])
 
         alertPopup.then(function(res) {
           console.log('ALERT ACCIDENT PROCESS STOPPED.');
+          return;
         });
 
         $timeout(function() {
@@ -195,16 +184,16 @@ angular.module('starter.controllers', ['ngCordova'])
         if(localConfig.EmergencyAlert == "true"){
           if(localConfig.CallMedic == "true"){
             if(localConfig.MedicPhone != ""){
-              //$scope.Call(localConfig.MedicPhone);
+              $scope.Call(localConfig.MedicPhone);
             }
           }
           else if(localConfig.CallPolice == "true"){
-            //$scope.Call(localConfig.PolicePhone);
+            $scope.Call(localConfig.PolicePhone);
           }
         }
         else if(localConfig.FamilyAlert == "true"){
           if(localConfig.SendSms == "true"){
-            // $scope.SendSMS(localConfig.FamilyPhone);
+            $scope.SendSMS(localConfig.FamilyPhone);
           }
 
           if(localConfig.CallFamily == "true"){
@@ -258,7 +247,7 @@ angular.module('starter.controllers', ['ngCordova'])
 
       // Functions to activate/deactivate detection of accidents
       $scope.ActivateDetector = function(){
-        // shake.startWatch(onShake, 40, onError);
+        shake.startWatch(onShake, 40, onError);
       }
 
       $scope.DeactivateDetector = function(){
@@ -288,7 +277,7 @@ angular.module('starter.controllers', ['ngCordova'])
             waitTime = Number(localConfig.AlertTimeEmergency) * 1000;
           }
         }
-        $scope.showAlert('<div class="loading-color"><b>ACCIDENT DETECTED<b></div>', '<div class="loading-color"><b>Is not and accident? Then click [Cancel] button.<b></div>', waitTime, true);
+        $scope.showAlert('<div class="loading-color"><b>ACCIDENT DETECTED<b></div>', '<div class="loading-color"><b>Is not and accident? Then click button.<b></div>', waitTime, true);
       };
       
       onError = function () {
@@ -598,9 +587,11 @@ angular.module('starter.controllers', ['ngCordova'])
         // $scope.isTracking = false;
         // watch.clearWatch();
         navigator.geolocation.clearWatch($scope.watch);
-        if($scope.currentMapTrack){
-          $scope.currentMapTrack.setMap(null);
-        }
+        
+        // if($scope.currentMapTrack){
+        //   $scope.currentMapTrack.setMap(null);
+        // }
+
         // hideLoading();
         // toastMessage("Saved track","bottom");
       }
@@ -680,6 +671,8 @@ angular.module('starter.controllers', ['ngCordova'])
 
         // Stop stream and finish cam device
         mediaRecorder.stream.getVideoTracks()[0].stop();
+
+        //$scope.locateClient();
         $scope.stopTracking();
         $scope.DeactivateDetector();
       }
@@ -844,8 +837,6 @@ angular.module('starter.controllers', ['ngCordova'])
       console.log("Error calling to...");
     }
 
-    // var phoneNumber = "620381230";
-    // var textMessage = "This is a test message, fuck yeah!"
     var optionsSMS = {};
 
     // On activate send sms, need request permission
@@ -1161,6 +1152,7 @@ angular.module('starter.controllers', ['ngCordova'])
         $scope.confirmDeleteFile();
       } else {
         // console.log('You are not sure');
+        return;
       }
     });
 
@@ -1489,6 +1481,10 @@ angular.module('starter.controllers', ['ngCordova'])
         return;
     }
 
+    $scope.CheckGrantedPermissions();
+  });
+
+  $scope.CheckGrantedPermissions = function(){
     if (window.localStorage.AllowGps == "true") {
       $scope.hideLocation = "display-off"; 
       $scope.hideLocation2 = "display-on"; 
@@ -1519,11 +1515,10 @@ angular.module('starter.controllers', ['ngCordova'])
       $scope.hideSms2 = "display-on"; 
       $scope.gs = "button-modal-logo-clicked";
     }
-  });
+  }
   
-
   $scope.RequestPermission = function(button) {
-
+      $scope.CheckGrantedPermissions();
       switch(button){
         case 1:
           cordova.plugins.diagnostic.requestLocationAuthorization(function(status){
@@ -1591,6 +1586,10 @@ angular.module('starter.controllers', ['ngCordova'])
           });
         break;
         case 5:
+          window.localStorage.setItem("AllowPhone", "true");
+          $scope.hidePhone = "display-off"; 
+          $scope.hidePhone2 = "display-on";
+          $scope.gp = "button-modal-logo-clicked";
           // cordova.plugins.CordovaCall.sendCall('Grant Perission');
           // setTimeout(function(){
           //   cordova.plugins.CordovaCall.endCall();
@@ -1607,9 +1606,10 @@ angular.module('starter.controllers', ['ngCordova'])
           }, function(error) {
               console.info('[WARN] Permission not accepted')
               // Handle permission not accepted
-          })
+          });
         break;
       }
+      $scope.CheckGrantedPermissions();
   };
   
   $scope.checkPermissions = function(){   

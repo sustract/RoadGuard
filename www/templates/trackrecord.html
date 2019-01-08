@@ -7,28 +7,7 @@
       </ion-nav-buttons>
     </ion-nav-bar>
 
-    <!-- <ion-footer-bar class="no-lines-footer transparent-footer">
-        <div class="button-bar" ng-show="!isTracking">
-            <a style="border-radius: 0px;margin-right: 3px;" class="button button-modal-down" ng-click="startTracking();">Start Tracking</a>
-        </div>
-        <div class="button-bar" ng-show="isTracking">
-         <a style="border-radius: 0px;margin-left: 3px;"  class="button button-modal-down" ng-click="stopTracking();">Stop tracking</a>
-        </div> -->
-        <!-- <button ion-button full icon-left ng-click="startTracking()" *ngIf="!isTracking">
-            <ion-icon name="locate"></ion-icon>
-            Start Tracking
-          </button>
-        <button ion-button full color="danger" icon-left ng-click="stopTracking()" *ngIf="isTracking">
-            <ion-icon name="hand"></ion-icon>
-            Stop Tracking
-        </button>
-        <button ion-button full color="danger" icon-left ng-click="updatePosition()">
-            <ion-icon name="hand"></ion-icon>
-            Update position
-        </button>
-    </ion-footer-bar> -->
-
-    <ion-content>
+    <ion-content scroll="false">
         <div id="videos-container">
             <video id="video" poster="img/background-record.jpg"></video>
         </div>
@@ -38,19 +17,10 @@
             <ion-icon name="images" style="width:30px;height:30px;float:right;margin-right:5px;" class="button-aux-div {{show}}" ng-click="GetPhoto();"></ion-icon>
         </div>
   
-            <!-- <ion-icon class="button button-positive button-modal-logo" style="position:absolute; top:200px;left:30px;" name="square-outline" ng-click="startCameraAbove();">            
-            </ion-icon>    
-            <ion-icon class="button button-positive button-modal-logo" style="position:absolute; top:200px;left:140px;" name="square" ng-click="saveblob();">            
-            </ion-icon>
-            <ion-icon class="button button-positive button-modal-logo" style="position:absolute; top:260px;left:30px;" name="square-outline" ng-click="startRecord();">            
-            </ion-icon>
-            <ion-icon class="button button-positive button-modal-logo" style="position:absolute; top:260px;left:140px;" name="square" ng-click="stopRecord();">            
-            </ion-icon> -->
-
         <div class="aux-div2 {{show}}">
             <div style="float:left;">
-                <label class="font-div-color">Current speed: [{{info.speed}}]</label>
-                <label style="display:block;" class="font-div-color">Current location: [{{info.latitude}},{{info.longitude}}]</label>
+                <label class="font-div-color">Current speed: [{{info.speed | limitTo:5 }}]</label>
+                <label style="display:block;" class="font-div-color">Current location: [{{info.latitude | limitTo:8 }},{{info.longitude | limitTo:8}}]</label>
             </div>
             <ion-icon name="locate" style="width:30px;height:30px;float:right;margin-right:5px;" class="button-aux-div {{show}}" ng-click="locateClient();"></ion-icon>
         </div>
