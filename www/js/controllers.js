@@ -181,25 +181,21 @@ angular.module('starter.controllers', ['ngCordova'])
       };
 
       $scope.ManageAlertActions = function(){
-        if(localConfig.EmergencyAlert == "true"){
-          if(localConfig.CallMedic == "true"){
-            if(localConfig.MedicPhone != ""){
-              $scope.Call(localConfig.MedicPhone);
-            }
+        if(window.localStorage.getItem("EmergencyAlert") == "true"){
+          if(window.localStorage.getItem("CallMedic") == "true"){
+              $scope.Call(window.localStorage.getItem("MedicPhone"));
           }
-          else if(localConfig.CallPolice == "true"){
-            $scope.Call(localConfig.PolicePhone);
+          else if(window.localStorage.getItem("CallPolice") == "true"){
+            $scope.Call(window.localStorage.getItem("PolicePhone"));
           }
         }
-        else if(localConfig.FamilyAlert == "true"){
-          if(localConfig.SendSms == "true"){
-            $scope.SendSMS(localConfig.FamilyPhone);
+        else if(window.localStorage.getItem("FamilyAlert") == "true"){
+          if(window.localStorage.getItem("SendSms") == "true"){
+            $scope.SendSMS(window.localStorage.getItem("FamilyPhone"));
           }
 
           if(localConfig.CallFamily == "true"){
-            if(localConfig.FamilyPhone != ""){
-              $scope.Call(localConfig.FamilyPhone);
-            }
+              $scope.Call(window.localStorage.getItem("FamilyPhone"));
           }
         }
       }
@@ -534,22 +530,11 @@ angular.module('starter.controllers', ['ngCordova'])
         $scope.checkLocationBefore();
         $scope.trackedRoute = [];
         $scope.watch = navigator.geolocation.watchPosition(successWatch, errorWatch, watchOptions);
-        // watch = $cordovaGeolocation.watchPosition(watchOptions);
-        // watch.then(
-        //   null,
-        //   function(err) {
-        //     // error
-        //     console.log("TIMEOUUUUUUUUUUUUUUUUUUT...")
-        //   },
-        //   function(position) {
-        //    $scope.updatePosition(position);
-        //    console.log("DETECTED CHANGE POSITION...")
-        // });
       }
 
       function successWatch(position){
         $scope.updatePosition(position);
-        console.log("DETECED NEW POSITION...")
+        console.log("DETECTED NEW POSITION...")
       }
       
       function errorWatch(){
